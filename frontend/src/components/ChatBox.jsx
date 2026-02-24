@@ -58,9 +58,9 @@ export default function ChatBox() {
       const botMessage = {
         id: Date.now() + 1,
         type: 'bot',
-        text: data.message,
+        text: data.response,
         jobs: data.jobs,
-        intent: data.intent,
+        action: data.action,
         timestamp: new Date(),
       };
 
