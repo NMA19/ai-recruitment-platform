@@ -8,11 +8,11 @@ import { MessageSquare, Search, FileText, Sparkles, Zap, TrendingUp } from 'luci
 
 export default function ChatPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Decorative background elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-200 dark:bg-purple-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-200 dark:bg-blue-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-30 animate-pulse"></div>
       </div>
 
       <div className="relative max-w-7xl mx-auto px-4 py-6">
@@ -36,9 +36,9 @@ export default function ChatPage() {
             </div>
 
             {/* Features */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50">
-              <h3 className="font-semibold text-gray-900 mb-4 flex items-center">
-                <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-white/50 dark:border-gray-700/50">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                <Sparkles className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-400" />
                 What I Can Do
               </h3>
               
@@ -67,9 +67,9 @@ export default function ChatPage() {
             </div>
 
             {/* Pro Tips */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/50">
-              <h3 className="font-semibold text-gray-900 mb-3 text-sm">💡 Pro Tips</h3>
-              <ul className="space-y-2 text-xs text-gray-600">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg border border-white/50 dark:border-gray-700/50">
+              <h3 className="font-semibold text-gray-900 dark:text-white mb-3 text-sm">💡 Pro Tips</h3>
+              <ul className="space-y-2 text-xs text-gray-600 dark:text-gray-300">
                 <li className="flex items-start space-x-2">
                   <span className="text-blue-500 mt-0.5">•</span>
                   <span>Be specific about skills & location</span>
@@ -98,9 +98,9 @@ export default function ChatPage() {
 
 function FeatureCard({ icon, title, example, color }) {
   const colors = {
-    blue: 'bg-blue-50 text-blue-600 border-blue-100',
-    green: 'bg-green-50 text-green-600 border-green-100',
-    purple: 'bg-purple-50 text-purple-600 border-purple-100',
+    blue: 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800',
+    green: 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-800',
+    purple: 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 border-purple-100 dark:border-purple-800',
   };
 
   return (
@@ -109,7 +109,7 @@ function FeatureCard({ icon, title, example, color }) {
         {icon}
         <span className="font-medium text-sm">{title}</span>
       </div>
-      <code className="text-xs opacity-75">"{example}"</code>
+      <code className="text-xs opacity-75 dark:opacity-60">"{example}"</code>
     </div>
   );
 }

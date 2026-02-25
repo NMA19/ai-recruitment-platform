@@ -50,11 +50,11 @@ export default function JobsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        <div className="absolute top-60 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div className="absolute top-40 left-10 w-72 h-72 bg-purple-200 dark:bg-purple-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20"></div>
+        <div className="absolute top-60 right-10 w-72 h-72 bg-blue-200 dark:bg-blue-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20"></div>
       </div>
 
       {/* Header */}
@@ -74,36 +74,36 @@ export default function JobsPage() {
 
       {/* Search & Filters */}
       <div className="relative max-w-7xl mx-auto px-4 -mt-8">
-        <form onSubmit={handleSearch} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-blue-500/10 p-6 border border-white/50">
+        <form onSubmit={handleSearch} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl shadow-blue-500/10 p-6 border border-white/50 dark:border-gray-700/50">
           <div className="grid md:grid-cols-4 gap-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Job title or keyword"
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-all"
               />
             </div>
             
             <div className="relative">
-              <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="Location"
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-all"
               />
             </div>
 
             <div className="relative">
-              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Filter className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <select
                 value={contractType}
                 onChange={(e) => setContractType(e.target.value)}
-                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white transition-all appearance-none cursor-pointer"
+                className="w-full pl-12 pr-4 py-3.5 bg-gray-50/50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white dark:focus:bg-gray-700 dark:text-white transition-all appearance-none cursor-pointer"
               >
                 {contractTypes.map((type) => (
                   <option key={type.value} value={type.value}>
@@ -129,20 +129,20 @@ export default function JobsPage() {
         {loading ? (
           <div className="flex items-center justify-center py-16">
             <div className="text-center">
-              <Loader2 className="w-10 h-10 text-blue-600 animate-spin mx-auto" />
-              <p className="text-gray-500 mt-3">Loading jobs...</p>
+              <Loader2 className="w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin mx-auto" />
+              <p className="text-gray-500 dark:text-gray-400 mt-3">Loading jobs...</p>
             </div>
           </div>
         ) : jobs.length === 0 ? (
-          <div className="text-center py-16 bg-white/60 backdrop-blur-sm rounded-2xl border border-white/50">
-            <Briefcase className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No jobs found. Try different search criteria.</p>
+          <div className="text-center py-16 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl border border-white/50 dark:border-gray-700/50">
+            <Briefcase className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-gray-400 text-lg">No jobs found. Try different search criteria.</p>
           </div>
         ) : (
           <>
             <div className="flex items-center justify-between mb-6">
-              <p className="text-gray-600">
-                <span className="font-semibold text-gray-900">{jobs.length}</span> jobs found
+              <p className="text-gray-600 dark:text-gray-400">
+                <span className="font-semibold text-gray-900 dark:text-white">{jobs.length}</span> jobs found
               </p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">

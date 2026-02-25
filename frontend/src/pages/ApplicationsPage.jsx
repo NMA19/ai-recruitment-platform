@@ -30,31 +30,31 @@ export default function ApplicationsPage() {
   const statusConfig = {
     pending: {
       label: 'Pending',
-      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      color: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800',
       icon: Clock,
       gradient: 'from-amber-400 to-orange-500',
     },
     reviewed: {
       label: 'Reviewed',
-      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      color: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800',
       icon: FileText,
       gradient: 'from-blue-400 to-blue-600',
     },
     interview: {
       label: 'Interview',
-      color: 'bg-purple-50 text-purple-700 border-purple-200',
+      color: 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
       icon: Calendar,
       gradient: 'from-purple-400 to-purple-600',
     },
     accepted: {
       label: 'Accepted',
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      color: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
       icon: CheckCircle,
       gradient: 'from-emerald-400 to-green-600',
     },
     rejected: {
       label: 'Rejected',
-      color: 'bg-red-50 text-red-700 border-red-200',
+      color: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800',
       icon: XCircle,
       gradient: 'from-red-400 to-red-600',
     },
@@ -62,21 +62,21 @@ export default function ApplicationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 text-blue-600 animate-spin mx-auto" />
-          <p className="text-gray-500 mt-3">Loading your applications...</p>
+          <Loader2 className="w-10 h-10 text-blue-600 dark:text-blue-400 animate-spin mx-auto" />
+          <p className="text-gray-500 dark:text-gray-400 mt-3">Loading your applications...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-40 left-10 w-72 h-72 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
-        <div className="absolute top-60 right-10 w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20"></div>
+        <div className="absolute top-40 left-10 w-72 h-72 bg-purple-200 dark:bg-purple-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20"></div>
+        <div className="absolute top-60 right-10 w-72 h-72 bg-blue-200 dark:bg-blue-900/30 rounded-full mix-blend-multiply dark:mix-blend-normal filter blur-3xl opacity-20"></div>
       </div>
 
       {/* Header */}
@@ -97,12 +97,12 @@ export default function ApplicationsPage() {
       {/* Content */}
       <div className="relative max-w-7xl mx-auto px-4 py-10 -mt-6">
         {applications.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl shadow-blue-500/10 p-12 text-center border border-white/50">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl mb-4">
-              <FileText className="w-8 h-8 text-blue-500" />
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-3xl shadow-xl shadow-blue-500/10 p-12 text-center border border-white/50 dark:border-gray-700/50">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/50 dark:to-purple-900/50 rounded-2xl mb-4">
+              <FileText className="w-8 h-8 text-blue-500 dark:text-blue-400" />
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">No applications yet</h3>
-            <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">No applications yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               You haven't applied to any jobs yet. Explore our job listings and find your dream position!
             </p>
             <Link
@@ -121,14 +121,14 @@ export default function ApplicationsPage() {
                 const count = applications.filter(a => a.status === key).length;
                 const Icon = config.icon;
                 return (
-                  <div key={key} className="bg-white/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-blue-500/5 border border-white/50 hover:shadow-xl transition-shadow">
+                  <div key={key} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-5 shadow-lg shadow-blue-500/5 border border-white/50 dark:border-gray-700/50 hover:shadow-xl transition-shadow">
                     <div className="flex items-center space-x-2 mb-2">
                       <div className={`p-1.5 rounded-lg bg-gradient-to-br ${config.gradient}`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="text-sm text-gray-500 font-medium">{config.label}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">{config.label}</span>
                     </div>
-                    <p className="text-3xl font-bold text-gray-900">{count}</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">{count}</p>
                   </div>
                 );
               })}
@@ -141,11 +141,11 @@ export default function ApplicationsPage() {
                 const StatusIcon = status.icon;
 
                 return (
-                  <div key={application.id} className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-blue-500/5 p-6 border border-white/50 hover:shadow-xl transition-all">
+                  <div key={application.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg shadow-blue-500/5 p-6 border border-white/50 dark:border-gray-700/50 hover:shadow-xl transition-all">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 flex-wrap gap-y-2">
-                          <h3 className="font-semibold text-gray-900 text-lg">
+                          <h3 className="font-semibold text-gray-900 dark:text-white text-lg">
                             Job #{application.job_id}
                           </h3>
                           <span className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center border ${status.color}`}>
@@ -154,9 +154,9 @@ export default function ApplicationsPage() {
                           </span>
                         </div>
 
-                        <div className="mt-3 text-sm text-gray-500">
+                        <div className="mt-3 text-sm text-gray-500 dark:text-gray-400">
                           <span className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-2 text-gray-400" />
+                            <Calendar className="w-4 h-4 mr-2 text-gray-400 dark:text-gray-500" />
                             Applied on {new Date(application.created_at).toLocaleDateString('en-US', {
                               year: 'numeric',
                               month: 'long',
@@ -166,7 +166,7 @@ export default function ApplicationsPage() {
                         </div>
 
                         {application.cover_letter && (
-                          <p className="mt-4 text-gray-600 text-sm bg-gray-50/50 p-4 rounded-xl border border-gray-100">
+                          <p className="mt-4 text-gray-600 dark:text-gray-300 text-sm bg-gray-50/50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-600">
                             {application.cover_letter}
                           </p>
                         )}

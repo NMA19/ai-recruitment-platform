@@ -4,12 +4,14 @@
  */
 
 import { Link, useNavigate } from 'react-router-dom';
-import { LogOut, User, Menu, X, Briefcase, MessageSquare } from 'lucide-react';
+import { LogOut, User, Menu, X, Briefcase, MessageSquare, Moon, Sun } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -20,7 +22,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-white dark:bg-gray-800 shadow-sm sticky top-0 z-50 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -29,7 +31,7 @@ export default function Navbar() {
               <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25 group-hover:shadow-blue-500/40 transition-shadow">
                 <Briefcase className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                 HireMe
               </span>
             </Link>
@@ -39,36 +41,45 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-1">
             <Link 
               to="/" 
-              className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all flex items-center space-x-2"
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all flex items-center space-x-2"
             >
               <MessageSquare className="w-4 h-4" />
               <span>Chat</span>
             </Link>
             <Link 
               to="/jobs" 
-              className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all flex items-center space-x-2"
+              className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all flex items-center space-x-2"
             >
               <Briefcase className="w-4 h-4" />
               <span>Jobs</span>
             </Link>
 
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all"
+              aria-label="Toggle theme"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
+
             {isAuthenticated ? (
               <div className="flex items-center space-x-2 ml-4">
                 <Link 
                   to="/applications" 
-                  className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all"
                 >
                   My Applications
                 </Link>
-                <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 rounded-full">
+                <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full">
                   <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{user?.name}</span>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="flex items-center space-x-1 px-3 py-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  className="flex items-center space-x-1 px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
@@ -77,7 +88,7 @@ export default function Navbar() {
               <div className="flex items-center space-x-2 ml-4">
                 <Link 
                   to="/login" 
-                  className="px-4 py-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-gray-700 rounded-lg transition-all"
                 >
                   Login
                 </Link>
@@ -92,10 +103,16 @@ export default function Navbar() {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+            >
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-gray-600 hover:text-gray-900"
+              className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -104,18 +121,18 @@ export default function Navbar() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 space-y-2">
+          <div className="md:hidden py-4 space-y-2 border-t dark:border-gray-700">
             <Link 
               to="/" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="block px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               Chat
             </Link>
             <Link 
               to="/jobs" 
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+              className="block px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
             >
               Jobs
             </Link>
@@ -124,13 +141,13 @@ export default function Navbar() {
                 <Link 
                   to="/applications" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="block px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   My Applications
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  className="block w-full text-left px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                 >
                   Logout
                 </button>
@@ -140,14 +157,14 @@ export default function Navbar() {
                 <Link 
                   to="/login" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                  className="block px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                 >
                   Login
                 </Link>
                 <Link 
                   to="/register" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                  className="block px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg"
                 >
                   Sign Up
                 </Link>

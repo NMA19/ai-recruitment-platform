@@ -12,7 +12,7 @@ export default function MessageBubble({ message }) {
     <div className={`flex items-start space-x-3 ${!isBot ? 'flex-row-reverse space-x-reverse' : ''}`}>
       {/* Avatar */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-        isBot ? 'bg-blue-100 text-blue-600' : 'bg-gray-200 text-gray-600'
+        isBot ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'
       }`}>
         {isBot ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
       </div>
@@ -21,7 +21,7 @@ export default function MessageBubble({ message }) {
       <div className={`max-w-[75%] ${isBot ? '' : 'text-right'}`}>
         <div className={`inline-block px-4 py-2.5 rounded-2xl ${
           isBot 
-            ? 'bg-white shadow-sm border border-gray-100 text-gray-800' 
+            ? 'bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 text-gray-800 dark:text-gray-200' 
             : 'bg-blue-600 text-white'
         }`}>
           {/* Format message text with markdown-like support */}
@@ -31,7 +31,7 @@ export default function MessageBubble({ message }) {
         </div>
         
         {/* Timestamp */}
-        <div className={`text-xs text-gray-400 mt-1 ${isBot ? '' : 'text-right'}`}>
+        <div className={`text-xs text-gray-400 dark:text-gray-500 mt-1 ${isBot ? '' : 'text-right'}`}>
           {formatTime(message.timestamp)}
         </div>
       </div>

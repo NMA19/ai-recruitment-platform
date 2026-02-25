@@ -80,7 +80,7 @@ export default function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 overflow-hidden">
+    <div className="flex flex-col h-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 dark:border-gray-700/50 overflow-hidden">
       {/* Chat Header */}
       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 px-6 py-4">
         <div className="flex items-center space-x-3">
@@ -95,7 +95,7 @@ export default function ChatBox() {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/50">
         {messages.map((message) => (
           <div key={message.id} className="animate-fade-in-up">
             <MessageBubble message={message} />
@@ -113,11 +113,11 @@ export default function ChatBox() {
 
         {/* Loading indicator */}
         {loading && (
-          <div className="flex items-center space-x-2 text-gray-500 ml-12">
+          <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 ml-12">
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
-              <div className="w-2 h-2 bg-gray-400 rounded-full typing-dot"></div>
+              <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
+              <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
+              <div className="w-2 h-2 bg-gray-400 dark:bg-gray-500 rounded-full typing-dot"></div>
             </div>
             <span className="text-sm">AI is thinking...</span>
           </div>
@@ -127,14 +127,14 @@ export default function ChatBox() {
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleSend} className="p-4 bg-white border-t">
+      <form onSubmit={handleSend} className="p-4 bg-white dark:bg-gray-800 border-t dark:border-gray-700">
         <div className="flex items-center space-x-2">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message... (e.g., 'Find me Python jobs in Algiers')"
-            className="flex-1 px-4 py-3 bg-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-gray-600 transition-all placeholder-gray-500 dark:placeholder-gray-400"
             disabled={loading}
           />
           <button
