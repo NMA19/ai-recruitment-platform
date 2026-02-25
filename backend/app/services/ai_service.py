@@ -735,8 +735,7 @@ class AIService:
                     break
 
         # Detect job sector from keywords
-        for sector_key, sector_info in JOB_SECTORS.items():
-            sector_keywords = sector_info.get("keywords", [])
+        for sector_key, sector_keywords in JOB_SECTORS.items():
             for keyword in sector_keywords:
                 if keyword.lower() in message_lower:
                     params["sector"] = sector_key
@@ -785,8 +784,7 @@ class AIService:
         
         # Apply sector filter if specified
         if "sector" in params:
-            sector_info = JOB_SECTORS.get(params["sector"], {})
-            sector_keywords = sector_info.get("keywords", [])
+            sector_keywords = JOB_SECTORS.get(params["sector"], [])
             # Search by sector keywords in title, description
             if sector_keywords:
                 sector_filter = or_(*[Job.title.ilike(f"%{kw}%") for kw in sector_keywords], 
