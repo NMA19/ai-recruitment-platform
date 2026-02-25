@@ -20,7 +20,7 @@ export function AuthProvider({ children }) {
         try {
           const response = await authAPI.getMe();
           setUser(response.data);
-        } catch (error) {
+        } catch {
           // Token invalid, clear it
           localStorage.removeItem('token');
           setToken(null);

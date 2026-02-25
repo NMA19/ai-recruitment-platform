@@ -31,9 +31,9 @@ const STATUS_LABELS = {
 export default function DossierPage() {
   const { user } = useAuth();
   const [dossier, setDossier] = useState(null);
-  const [requirements, setRequirements] = useState(null);
+  const [_requirements, setRequirements] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [_error, setError] = useState(null);
   const [uploadingDoc, setUploadingDoc] = useState(null);
   const [lang, setLang] = useState('fr'); // Default to French
 
@@ -47,7 +47,7 @@ export default function DossierPage() {
       const response = await api.get('/documents/my-dossier');
       setDossier(response.data);
     } catch (err) {
-      setError('Erreur lors du chargement du dossier');
+      setError(err.message || 'Erreur lors du chargement du dossier');
       console.error(err);
     } finally {
       setLoading(false);
