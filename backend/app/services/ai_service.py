@@ -574,14 +574,44 @@ Dites-moi quel secteur vous intéresse et je trouverai les emplois!""",
 
 
 class AIService:
-    """AI Service for processing chat messages with multilingual support"""
+    """AI Service for processing chat messages with NLP and LLM support"""
 
     def __init__(self):
         self.openai_client = None
-        self._init_openai()
+        self.groq_client = None
+        self.nlp_fr = None
+        self.nlp_en = None
+        self._init_nlp()
+        self._init_llm()
 
-    def _init_openai(self):
-        """Initialize OpenAI client if API key is available"""
+    def _init_nlp(self):
+        """Initialize spaCy NLP models"""
+        try:
+            import spacy
+            # Load French model for NLP processing
+            try:
+                self.nlp_fr = spacy.load("fr_core_news_sm")
+            except OSError:
+                pass
+            # English model (optional)
+            try:
+                self.nlp_en = spacy.load("en_core_web_sm")
+            except OSError:
+                pass
+        except ImportError:
+            pass
+
+    def _init_llm(self):
+        """Initialize LLM clients (Groq or OpenAI)"""
+        # Try Groq first (free tier)
+        if settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your-groq-api-key-here":
+            try:
+                from groq import Groq
+                self.groq_client = Groq(api_key=settings.GROQ_API_KEY)
+            except ImportError:
+                pass
+        
+        # Fallback to OpenAI
         if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY != "your-openai-api-key-here":
             try:
                 from openai import OpenAI
@@ -590,7 +620,24 @@ class AIService:
                 pass
 
     def _detect_language(self, message: str) -> str:
-        """Detect the language of the message (ar, fr, en)"""
+        """Detect language using langdetect library with fallback"""
+        try:
+            from langdetect import detect, DetectorFactory
+            DetectorFactory.seed = 0  # For consistent results
+            lang = detect(message)
+            # Map to our supported languages
+            if lang == 'ar':
+                return 'ar'
+            elif lang == 'fr':
+                return 'fr'
+            else:
+                return 'en'
+        except:
+            # Fallback to pattern-based detection
+            return self._detect_language_fallback(message)
+
+    def _detect_language_fallback(self, message: str) -> str:
+        """Fallback language detection using patterns"""
         # Arabic detection - check for Arabic characters
         arabic_pattern = re.compile(r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+')
         if arabic_pattern.search(message):
@@ -1133,40 +1180,76 @@ Comment puis-je vous aider?""",
         }
 
     def _handle_general_query(self, message: str, db: Session, lang: str = 'fr') -> Dict[str, Any]:
-        """Handle general queries using OpenAI or fallback with multilingual response"""
-        if self.openai_client:
-            try:
-                # Get some job context
-                jobs = db.query(Job).filter(Job.is_active == True).limit(5).all()
-                job_context = "\n".join([
-                    f"- {j.title} at {j.company} ({j.location}, {j.contract_type})"
-                    for j in jobs
-                ])
-                
-                lang_instruction = {
-                    "en": "Respond in English.",
-                    "fr": "Répondez en français.",
-                    "ar": "أجب باللغة العربية."
-                }
+        """Handle general queries using LLM (Groq/OpenAI) with NLP preprocessing"""
+        
+        # NLP preprocessing with spaCy (if available)
+        entities = []
+        keywords = []
+        if self.nlp_fr and lang == 'fr':
+            doc = self.nlp_fr(message)
+            entities = [(ent.text, ent.label_) for ent in doc.ents]
+            keywords = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+        
+        # Get job context
+        jobs = db.query(Job).filter(Job.is_active == True).limit(5).all()
+        job_context = "\n".join([
+            f"- {j.title} at {j.company} ({j.location}, {j.contract_type})"
+            for j in jobs
+        ]) if jobs else "No jobs currently available."
+        
+        lang_instruction = {
+            "en": "Respond in English.",
+            "fr": "Répondez en français.",
+            "ar": "أجب باللغة العربية."
+        }
+        
+        system_prompt = f"""You are Wassit, a helpful recruitment assistant for ANEM Algeria. {lang_instruction.get(lang, lang_instruction['fr'])}
 
-                response = self.openai_client.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": f"""You are a helpful recruitment assistant for Wassit Online (ANEM Algeria). {lang_instruction.get(lang, lang_instruction['fr'])}
 Available jobs:
 {job_context}
 
-Keep responses concise and helpful. If users want to search for jobs, tell them they can say things like "Find Python jobs in Algiers" or "Show me internships"."""
-                        },
+Extracted entities: {entities}
+Keywords: {keywords}
+
+Help users find jobs, answer questions about ANEM services, and provide career advice. Be concise and helpful."""
+
+        # Try Groq LLM first (free tier)
+        if self.groq_client:
+            try:
+                response = self.groq_client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": message}
+                    ],
+                    max_tokens=300,
+                    temperature=0.7
+                )
+                return {
+                    "response": response.choices[0].message.content,
+                    "action": "llm_response",
+                    "nlp_entities": entities,
+                    "nlp_keywords": keywords
+                }
+            except Exception as e:
+                pass
+        
+        # Try OpenAI as fallback
+        if self.openai_client:
+            try:
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": system_prompt},
                         {"role": "user", "content": message}
                     ],
                     max_tokens=300
                 )
                 return {
                     "response": response.choices[0].message.content,
-                    "action": "ai_response"
+                    "action": "ai_response",
+                    "nlp_entities": entities,
+                    "nlp_keywords": keywords
                 }
             except Exception as e:
                 pass
