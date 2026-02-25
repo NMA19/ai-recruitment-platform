@@ -80,11 +80,18 @@ export default function ChatBox() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/50 overflow-hidden">
       {/* Chat Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-        <h2 className="text-white text-lg font-semibold">AI Recruitment Assistant</h2>
-        <p className="text-blue-100 text-sm">Ask me about jobs, applications, or career advice</p>
+      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 px-6 py-4">
+        <div className="flex items-center space-x-3">
+          <div className="w-10 h-10 bg-white/20 backdrop-blur rounded-xl flex items-center justify-center">
+            <span className="text-xl">🤖</span>
+          </div>
+          <div>
+            <h2 className="text-white text-lg font-semibold">HireMe Assistant</h2>
+            <p className="text-blue-100 text-xs">Powered by AI • Always here to help</p>
+          </div>
+        </div>
       </div>
 
       {/* Messages Container */}
