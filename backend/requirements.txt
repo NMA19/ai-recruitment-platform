@@ -16,8 +16,30 @@ pydantic>=2.5.0
 pydantic-settings>=2.1.0
 email-validator>=2.1.0
 
-# OpenAI (optional)
-openai>=1.0.0
+# ============================================
+# AI/ML Dependencies (PFE Requirements)
+# ============================================
 
+# NLP - Natural Language Processing
+spacy>=3.7.0            # NLP pipeline (intent detection, entity extraction)
+langdetect>=1.0.9       # Language detection (FR/AR/EN)
+
+# Machine Learning - Intent Classification
+scikit-learn>=1.4.0     # ML models (TF-IDF, Logistic Regression)
+numpy>=1.26.0           # Numerical computing
+
+# LLM - Large Language Models
+openai>=1.0.0           # OpenAI API (cloud LLM)
+httpx>=0.26.0           # HTTP client for Ollama API
+
+# ============================================
 # Development
+# ============================================
 python-dotenv>=1.0.0
+
+# ============================================
+# SpaCy Language Models (install separately)
+# ============================================
+# Run after pip install:
+# python -m spacy download fr_core_news_sm  # French
+# python -m spacy download en_core_web_sm   # English (optional)

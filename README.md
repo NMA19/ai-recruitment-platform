@@ -1,131 +1,84 @@
-# Wassit Online - ANEM Recruitment Platform 🇩🇿
+# Wassit Online - Chatbot ANEM
 
-AI-powered recruitment platform for ANEM (Agence Nationale de l'Emploi) Algeria with multilingual chatbot (French, Arabic, English).
+Plateforme de recrutement avec chatbot IA pour l'ANEM Algérie.
 
-## Features
+## Lancer le projet
 
-- 🤖 **AI Chatbot** - NLP + LLM job search (spaCy + OpenAI)
-- 📁 **Dossier Tracking** - ANEM document management
-- 🌍 **Multilingual** - FR/AR/EN with RTL support
-- 🌙 **Dark Mode** - Theme toggle
-- 🔐 **JWT Auth** - Secure authentication
-
-## Architecture
-
-```
-┌──────────────────────────────┐
-│     Frontend (React/Vite)    │
-│   Chat UI + User Dashboard   │
-└───────────────▲──────────────┘
-                │ REST API
-┌───────────────┴──────────────┐
-│     Backend API (FastAPI)    │
-└───────────────▲──────────────┘
-                │
-┌───────────────┴──────────────┐
-│       AI Service Layer       │
-│      NLP (spaCy) + LLM       │
-└───────────────▲──────────────┘
-                │
-┌───────────────┴──────────────┐
-│    Database (SQLAlchemy)     │
-│  Users • Jobs • Applications │
-└──────────────────────────────┘
-```
-
-## Project Structure
-
-```
-PFE/
-├── backend/
-│   ├── app/
-│   │   ├── api/routes/    # auth, jobs, chat, documents
-│   │   ├── core/          # config, security
-│   │   ├── db/            # database
-│   │   ├── models/        # SQLAlchemy models
-│   │   ├── schemas/       # Pydantic schemas
-│   │   └── services/      # AI service
-│   ├── requirements.txt
-│   └── seed.py
-│
-└── frontend/
-    ├── src/
-    │   ├── components/    # ChatBox, Navbar, JobCard
-    │   ├── pages/         # Chat, Jobs, Dossier, Login
-    │   ├── context/       # Auth, Theme, Language
-    │   └── services/      # API calls
-    └── package.json
-```
-
-## Quick Start
-
-### Backend
 ```bash
+# Backend
 cd backend
-python -m venv venv
-source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
+python -m spacy download fr_core_news_sm
 python seed.py
-uvicorn app.main:app --reload --port 8000
-```
+python -m uvicorn app.main:app --reload --port 8000
 
-### Frontend
-```bash
+# Frontend
 cd frontend
 npm install
 npm run dev
 ```
 
-### Access
-- Frontend: http://localhost:5173
-- API Docs: http://localhost:8000/docs
+**URLs:** Frontend http://localhost:5173 | API http://localhost:8000/docs
 
-## Environment Variables
+## Comptes test
 
-```env
-# backend/.env
-DATABASE_URL=sqlite:///./recruitment.db
-SECRET_KEY=your-secret-key
-OPENAI_API_KEY=sk-xxx           # Optional for AI responses
+- `john@example.com` / `john123` (candidat)
+- `admin@example.com` / `admin123` (admin)
+
+## Stack
+
+- **Frontend:** React + Vite + TailwindCSS
+- **Backend:** FastAPI + SQLAlchemy
+- **IA:** sklearn (ML) + spaCy (NLP) + Ollama/OpenAI (LLM)
+
+## Architecture
+
+```
+┌─────────────────────────────────┐
+│   Frontend (React + Vite)       │
+│   Pages: Chat, Jobs, Dossier    │
+└───────────────┬─────────────────┘
+                │ REST API
+┌───────────────▼─────────────────┐
+│   Backend (FastAPI)             │
+│   Routes: auth, chat, jobs      │
+└───────────────┬─────────────────┘
+                │
+┌───────────────▼─────────────────┐
+│   Services IA                   │
+│   ML Classifier → NLP → LLM     │
+└───────────────┬─────────────────┘
+                │
+┌───────────────▼─────────────────┐
+│   Database (SQLite)             │
+│   Users, Jobs, Applications     │
+└─────────────────────────────────┘
 ```
 
-## Tech Stack
+## Structure du projet
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React, Tailwind CSS, Vite |
-| Backend | FastAPI, Python |
-| Database | SQLAlchemy (SQLite/PostgreSQL) |
-| NLP | spaCy, langdetect |
-| LLM | OpenAI (optional) |
-
-## API Endpoints
-
-| Route | Description |
-|-------|-------------|
-| `POST /auth/register` | Register user |
-| `POST /auth/login` | Login |
-| `POST /chat/guest` | Chat (no auth) |
-| `GET /jobs` | List jobs |
-| `POST /apply` | Apply for job |
-| `GET /documents/my-dossier` | Dossier status |
-
-## Demo Accounts
-
-| Email | Password |
-|-------|----------|
-| admin@example.com | admin123 |
-| john@example.com | john123 |
-
-## Chatbot Examples
-
-| Language | Input | Action |
-|----------|-------|--------|
-| 🇫🇷 French | "Chercher emploi Python à Alger" | Search jobs |
-| 🇩🇿 Arabic | "ما هي الوثائق المطلوبة؟" | ANEM FAQ |
-| 🇬🇧 English | "Apply for job #5" | Submit application |
-
-## License
-
-MIT
+```
+PFE/
+├── backend/
+│   ├── app/
+│   │   ├── api/routes/      # auth, chat, jobs, documents
+│   │   ├── core/            # config, security
+│   │   ├── db/              # database
+│   │   ├── models/          # User, Job, Application
+│   │   ├── schemas/         # Pydantic validation
+│   │   └── services/
+│   │       ├── ai_service.py        # Orchestration IA
+│   │       ├── ml_classifier.py     # Intent classification
+│   │       ├── ollama_service.py    # LLM local
+│   │       ├── candidate_ranking.py # Classement ML
+│   │       └── analytics.py         # Métriques
+│   ├── requirements.txt
+│   └── seed.py
+│
+└── frontend/
+    └── src/
+        ├── components/      # ChatBox, Navbar, JobCard
+        ├── pages/           # Chat, Jobs, Login, Dossier
+        ├── context/         # Auth, Theme, Language
+        └── services/        # API calls
+```

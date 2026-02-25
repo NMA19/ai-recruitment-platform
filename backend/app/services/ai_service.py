@@ -574,14 +574,30 @@ Dites-moi quel secteur vous intéresse et je trouverai les emplois!""",
 
 
 class AIService:
-    """AI Service for processing chat messages with NLP and LLM support"""
+    """
+    AI Service for processing chat messages with NLP and LLM support
+    
+    Features:
+    - ML-based intent classification (sklearn)
+    - Local LLM via Ollama (offline support)
+    - Cloud LLM via OpenAI (if configured)
+    - spaCy NLP for entity extraction
+    - Performance analytics tracking
+    """
 
     def __init__(self):
         self.llm_client = None
         self.nlp_fr = None
         self.nlp_en = None
+        self.ml_classifier = None
+        self.ollama = None
+        self.analytics = None
+        
         self._init_nlp()
         self._init_llm()
+        self._init_ml_classifier()
+        self._init_ollama()
+        self._init_analytics()
 
     def _init_nlp(self):
         """Initialize spaCy NLP models"""
@@ -608,6 +624,39 @@ class AIService:
                 self.llm_client = OpenAI(api_key=settings.OPENAI_API_KEY)
             except ImportError:
                 pass
+
+    def _init_ml_classifier(self):
+        """Initialize ML-based intent classifier"""
+        try:
+            from .ml_classifier import intent_classifier
+            self.ml_classifier = intent_classifier
+            print("ML Intent Classifier initialized")
+        except Exception as e:
+            print(f"ML Classifier not available: {e}")
+            self.ml_classifier = None
+
+    def _init_ollama(self):
+        """Initialize Ollama for local LLM support"""
+        try:
+            from .ollama_service import ollama_service
+            self.ollama = ollama_service
+            if self.ollama.is_available:
+                print(f"Ollama initialized with models: {[m['name'] for m in self.ollama.list_models()]}")
+            else:
+                print("Ollama service not available (server not running)")
+        except Exception as e:
+            print(f"Ollama not available: {e}")
+            self.ollama = None
+
+    def _init_analytics(self):
+        """Initialize analytics tracking"""
+        try:
+            from .analytics import chatbot_analytics
+            self.analytics = chatbot_analytics
+            print("Analytics tracking initialized")
+        except Exception as e:
+            print(f"Analytics not available: {e}")
+            self.analytics = None
 
     def _detect_language(self, message: str) -> str:
         """Detect language using langdetect library with fallback"""
@@ -673,37 +722,129 @@ class AIService:
     ) -> Dict[str, Any]:
         """
         Process a chat message and return appropriate response
-        Detects language and responds in the same language
+        Uses ML classifier for intent detection with rule-based fallback
+        Tracks analytics for performance evaluation
         
         Returns:
             Dict with 'response', optional 'jobs', and optional 'action'
         """
+        import time
+        start_time = time.time()
+        
         message_lower = message.lower().strip()
         
         # Detect language
         lang = self._detect_language(message)
 
-        # Check for specific intents
-        intent, params = self._detect_intent(message_lower)
-        params['lang'] = lang  # Pass language to handlers
+        # Use ML classifier for intent detection (with fallback to rule-based)
+        intent, confidence, params = self._detect_intent_ml(message_lower)
+        params['lang'] = lang
 
+        # Handle based on intent
         if intent == "search_jobs":
-            return self._handle_job_search(params, db, lang)
+            response = self._handle_job_search(params, db, lang)
         elif intent == "apply_job":
-            return self._handle_apply(params, db, user, lang)
+            response = self._handle_apply(params, db, user, lang)
         elif intent == "my_applications":
-            return self._handle_my_applications(db, user, lang)
+            response = self._handle_my_applications(db, user, lang)
         elif intent == "anem_faq":
-            return self._handle_anem_faq(params, lang)
+            response = self._handle_anem_faq(params, lang)
         elif intent == "help":
-            return self._handle_help(lang)
+            response = self._handle_help(lang)
         elif intent == "greeting":
-            return self._handle_greeting(user, lang)
+            response = self._handle_greeting(user, lang)
         elif intent == "profile_update":
-            return self._handle_profile_update(params, db, user, lang)
+            response = self._handle_profile_update(params, db, user, lang)
         else:
-            # Try OpenAI if available, otherwise use fallback
-            return self._handle_general_query(message, db, lang)
+            # Try LLM (Ollama first, then OpenAI) for general queries
+            response = self._handle_general_query(message, db, lang)
+
+        # Calculate response time
+        response_time_ms = (time.time() - start_time) * 1000
+
+        # Track analytics
+        if self.analytics:
+            try:
+                self.analytics.record_interaction(
+                    user_id=user.id if user else None,
+                    session_id=None,
+                    message=message,
+                    response=response.get("response", ""),
+                    intent=intent,
+                    confidence=confidence,
+                    response_time_ms=response_time_ms,
+                    language=lang,
+                    jobs_returned=len(response.get("jobs", [])),
+                    action_completed=response.get("action") in ["applied", "search"]
+                )
+            except Exception as e:
+                print(f"Analytics tracking error: {e}")
+
+        # Add ML metadata to response
+        response["_ml_metadata"] = {
+            "intent": intent,
+            "confidence": confidence,
+            "response_time_ms": round(response_time_ms, 2),
+            "language": lang
+        }
+
+        return response
+
+    def _detect_intent_ml(self, message: str) -> Tuple[str, float, Dict]:
+        """
+        Detect intent using ML classifier with rule-based fallback
+        
+        Returns:
+            Tuple of (intent, confidence, params)
+        """
+        params = {}
+        
+        # Try ML classifier first
+        if self.ml_classifier and self.ml_classifier.is_trained:
+            try:
+                prediction = self.ml_classifier.predict_with_details(message)
+                intent = prediction["intent"]
+                confidence = prediction["confidence"]
+                
+                # If high confidence, use ML prediction
+                if confidence >= 0.4:
+                    # Extract additional params based on intent
+                    params = self._extract_params_for_intent(message, intent)
+                    return intent, confidence, params
+            except Exception as e:
+                print(f"ML classifier error: {e}")
+        
+        # Fallback to rule-based detection
+        intent, params = self._detect_intent(message)
+        return intent, 0.5, params  # Default confidence for rule-based
+
+    def _extract_params_for_intent(self, message: str, intent: str) -> Dict:
+        """Extract parameters based on detected intent"""
+        params = {}
+        
+        if intent == "search_jobs":
+            params = self._extract_search_params(message)
+        
+        elif intent == "apply_job":
+            # Extract job ID
+            apply_match = re.search(r"(?:apply|postuler|تقدم)\s+(?:for\s+)?(?:job\s+)?#?(\d+)", message)
+            if apply_match:
+                params["job_id"] = int(apply_match.group(1))
+            else:
+                # Try to find any number
+                num_match = re.search(r"#?(\d+)", message)
+                if num_match:
+                    params["job_id"] = int(num_match.group(1))
+        
+        elif intent == "anem_faq":
+            # Find matching FAQ pattern
+            for pattern, responses in ANEM_FAQ.items():
+                if re.search(pattern, message, re.IGNORECASE):
+                    params["faq_key"] = pattern
+                    params["responses"] = responses
+                    break
+        
+        return params
 
     def _detect_intent(self, message: str) -> Tuple[str, Dict]:
         """Detect the intent of the message"""
@@ -1170,7 +1311,10 @@ Comment puis-je vous aider?""",
         }
 
     def _handle_general_query(self, message: str, db: Session, lang: str = 'fr') -> Dict[str, Any]:
-        """Handle general queries using LLM (Groq/OpenAI) with NLP preprocessing"""
+        """
+        Handle general queries using LLM with NLP preprocessing
+        Priority: Ollama (local) -> OpenAI (cloud) -> Fallback
+        """
         
         # NLP preprocessing with spaCy (if available)
         entities = []
@@ -1179,8 +1323,12 @@ Comment puis-je vous aider?""",
             doc = self.nlp_fr(message)
             entities = [(ent.text, ent.label_) for ent in doc.ents]
             keywords = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
+        elif self.nlp_en and lang == 'en':
+            doc = self.nlp_en(message)
+            entities = [(ent.text, ent.label_) for ent in doc.ents]
+            keywords = [token.lemma_ for token in doc if not token.is_stop and token.is_alpha]
         
-        # Get job context
+        # Get job context for LLM
         jobs = db.query(Job).filter(Job.is_active == True).limit(5).all()
         job_context = "\n".join([
             f"- {j.title} at {j.company} ({j.location}, {j.contract_type})"
@@ -1193,19 +1341,41 @@ Comment puis-je vous aider?""",
             "ar": "أجب باللغة العربية."
         }
         
-        system_prompt = f"""You are Wassit, a helpful recruitment assistant for ANEM Algeria. {lang_instruction.get(lang, lang_instruction['fr'])}
-
-Available jobs:
+        context_prompt = f"""Available jobs:
 {job_context}
 
 Extracted entities: {entities}
 Keywords: {keywords}
 
-Help users find jobs, answer questions about ANEM services, and provide career advice. Be concise and helpful."""
+User message: {message}"""
 
-        # Try LLM for intelligent response
+        # Try Ollama first (local LLM - no API costs)
+        if self.ollama and self.ollama.is_available:
+            try:
+                result = self.ollama.generate(
+                    prompt=context_prompt,
+                    options={"temperature": 0.7}
+                )
+                if result.get("response"):
+                    return {
+                        "response": result["response"],
+                        "action": "ollama_response",
+                        "llm_provider": "ollama",
+                        "nlp_entities": entities,
+                        "nlp_keywords": keywords
+                    }
+            except Exception as e:
+                print(f"Ollama error: {e}")
+
+        # Try OpenAI as fallback
         if self.llm_client:
             try:
+                system_prompt = f"""You are Wassit, a helpful recruitment assistant for ANEM Algeria. {lang_instruction.get(lang, lang_instruction['fr'])}
+
+{context_prompt}
+
+Help users find jobs, answer questions about ANEM services, and provide career advice. Be concise and helpful."""
+
                 response = self.llm_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
@@ -1216,14 +1386,15 @@ Help users find jobs, answer questions about ANEM services, and provide career a
                 )
                 return {
                     "response": response.choices[0].message.content,
-                    "action": "llm_response",
+                    "action": "openai_response",
+                    "llm_provider": "openai",
                     "nlp_entities": entities,
                     "nlp_keywords": keywords
                 }
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"OpenAI error: {e}")
 
-        # Multilingual fallback responses
+        # Multilingual fallback responses (no LLM available)
         fallback_messages = {
             "en": "I'm here to help you find jobs! Try asking me to:\n- Search for jobs (e.g., 'Find Python jobs')\n- Apply for a position (e.g., 'Apply for job #5')\n- View your applications\n- Ask about ANEM services\n\nWhat would you like to do?",
             "fr": "Je suis là pour vous aider à trouver un emploi! Essayez de me demander:\n- Chercher des emplois (ex: 'Trouver emplois Python')\n- Postuler (ex: 'Postuler pour #5')\n- Voir vos candidatures\n- Questions sur l'ANEM\n\nQue souhaitez-vous faire?",
@@ -1232,7 +1403,50 @@ Help users find jobs, answer questions about ANEM services, and provide career a
         
         return {
             "response": fallback_messages.get(lang, fallback_messages["fr"]),
-            "action": "fallback"
+            "action": "fallback",
+            "llm_provider": None,
+            "nlp_entities": entities,
+            "nlp_keywords": keywords
+        }
+
+    def get_service_status(self) -> Dict[str, Any]:
+        """Get status of all AI services"""
+        return {
+            "nlp": {
+                "spacy_fr": self.nlp_fr is not None,
+                "spacy_en": self.nlp_en is not None
+            },
+            "ml_classifier": {
+                "available": self.ml_classifier is not None,
+                "trained": self.ml_classifier.is_trained if self.ml_classifier else False,
+                "info": self.ml_classifier.get_model_info() if self.ml_classifier else None
+            },
+            "llm": {
+                "ollama": {
+                    "available": self.ollama.is_available if self.ollama else False,
+                    "models": self.ollama.list_models() if self.ollama and self.ollama.is_available else []
+                },
+                "openai": self.llm_client is not None
+            },
+            "analytics": self.analytics is not None
+        }
+
+    def get_analytics_summary(self, days: int = 30) -> Dict[str, Any]:
+        """Get chatbot analytics summary"""
+        if not self.analytics:
+            return {"error": "Analytics not available"}
+        
+        metrics = self.analytics.get_metrics(period_days=days)
+        return {
+            "total_interactions": metrics.total_interactions,
+            "success_rate": round(metrics.intent_accuracy * 100, 1),
+            "avg_response_time_ms": round(metrics.avg_response_time_ms, 2),
+            "satisfaction_rate": round(metrics.satisfaction_rate * 100, 1),
+            "by_type": metrics.interactions_by_type,
+            "by_language": metrics.interactions_by_language,
+            "job_searches": metrics.total_job_searches,
+            "applications": metrics.total_applications,
+            "conversion_rate": round(metrics.search_to_apply_rate * 100, 1)
         }
 
 
