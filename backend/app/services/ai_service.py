@@ -577,8 +577,7 @@ class AIService:
     """AI Service for processing chat messages with NLP and LLM support"""
 
     def __init__(self):
-        self.openai_client = None
-        self.groq_client = None
+        self.llm_client = None
         self.nlp_fr = None
         self.nlp_en = None
         self._init_nlp()
@@ -602,20 +601,11 @@ class AIService:
             pass
 
     def _init_llm(self):
-        """Initialize LLM clients (Groq or OpenAI)"""
-        # Try Groq first (free tier)
-        if settings.GROQ_API_KEY and settings.GROQ_API_KEY != "your-groq-api-key-here":
-            try:
-                from groq import Groq
-                self.groq_client = Groq(api_key=settings.GROQ_API_KEY)
-            except ImportError:
-                pass
-        
-        # Fallback to OpenAI
+        """Initialize LLM client (OpenAI or compatible)"""
         if settings.OPENAI_API_KEY and settings.OPENAI_API_KEY != "your-openai-api-key-here":
             try:
                 from openai import OpenAI
-                self.openai_client = OpenAI(api_key=settings.OPENAI_API_KEY)
+                self.llm_client = OpenAI(api_key=settings.OPENAI_API_KEY)
             except ImportError:
                 pass
 
@@ -1213,31 +1203,10 @@ Keywords: {keywords}
 
 Help users find jobs, answer questions about ANEM services, and provide career advice. Be concise and helpful."""
 
-        # Try Groq LLM first (free tier)
-        if self.groq_client:
+        # Try LLM for intelligent response
+        if self.llm_client:
             try:
-                response = self.groq_client.chat.completions.create(
-                    model="llama-3.1-8b-instant",
-                    messages=[
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": message}
-                    ],
-                    max_tokens=300,
-                    temperature=0.7
-                )
-                return {
-                    "response": response.choices[0].message.content,
-                    "action": "llm_response",
-                    "nlp_entities": entities,
-                    "nlp_keywords": keywords
-                }
-            except Exception as e:
-                pass
-        
-        # Try OpenAI as fallback
-        if self.openai_client:
-            try:
-                response = self.openai_client.chat.completions.create(
+                response = self.llm_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": "system", "content": system_prompt},
@@ -1247,11 +1216,11 @@ Help users find jobs, answer questions about ANEM services, and provide career a
                 )
                 return {
                     "response": response.choices[0].message.content,
-                    "action": "ai_response",
+                    "action": "llm_response",
                     "nlp_entities": entities,
                     "nlp_keywords": keywords
                 }
-            except Exception as e:
+            except Exception:
                 pass
 
         # Multilingual fallback responses

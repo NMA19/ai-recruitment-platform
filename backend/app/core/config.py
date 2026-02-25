@@ -18,11 +18,8 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     
-    # OpenAI (optional)
+    # LLM API Key (OpenAI or compatible)
     OPENAI_API_KEY: Optional[str] = None
-    
-    # Groq LLM (free tier - get key at https://console.groq.com)
-    GROQ_API_KEY: Optional[str] = None
     
     class Config:
         env_file = ".env"

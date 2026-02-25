@@ -4,7 +4,7 @@ AI-powered recruitment platform for ANEM (Agence Nationale de l'Emploi) Algeria 
 
 ## Features
 
-- 🤖 **AI Chatbot** - NLP + LLM job search (spaCy + Groq)
+- 🤖 **AI Chatbot** - NLP + LLM job search (spaCy + OpenAI)
 - 📁 **Dossier Tracking** - ANEM document management
 - 🌍 **Multilingual** - FR/AR/EN with RTL support
 - 🌙 **Dark Mode** - Theme toggle
@@ -24,7 +24,7 @@ AI-powered recruitment platform for ANEM (Agence Nationale de l'Emploi) Algeria 
                 │
 ┌───────────────┴──────────────┐
 │       AI Service Layer       │
-│   NLP (spaCy) + LLM (Groq)   │
+│      NLP (spaCy) + LLM       │
 └───────────────▲──────────────┘
                 │
 ┌───────────────┴──────────────┐
@@ -87,8 +87,7 @@ npm run dev
 # backend/.env
 DATABASE_URL=sqlite:///./recruitment.db
 SECRET_KEY=your-secret-key
-GROQ_API_KEY=your-groq-api-key  # Free at console.groq.com
-OPENAI_API_KEY=sk-xxx           # Optional fallback
+OPENAI_API_KEY=sk-xxx           # Optional for AI responses
 ```
 
 ## Tech Stack
@@ -99,7 +98,7 @@ OPENAI_API_KEY=sk-xxx           # Optional fallback
 | Backend | FastAPI, Python |
 | Database | SQLAlchemy (SQLite/PostgreSQL) |
 | NLP | spaCy, langdetect |
-| LLM | Groq (Llama 3.1 - FREE) |
+| LLM | OpenAI (optional) |
 
 ## API Endpoints
 
