@@ -113,6 +113,13 @@ export default function Navbar() {
                 >
                   {t('nav.applications')}
                 </Link>
+                <Link 
+                  to="/dossier" 
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-gray-700 rounded-lg transition-all flex items-center space-x-1"
+                >
+                  <span>📁</span>
+                  <span>{t('nav.dossier') || 'Dossier'}</span>
+                </Link>
                 <div className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-full">
                   <div className="w-7 h-7 bg-gradient-to-br from-green-500 to-blue-500 rounded-full flex items-center justify-center">
                     <User className="w-4 h-4 text-white" />

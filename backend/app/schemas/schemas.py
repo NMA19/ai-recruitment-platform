@@ -227,3 +227,48 @@ class ChatResponse(BaseModel):
     response: str
     jobs: Optional[List[JobResponse]] = None
     action: Optional[str] = None
+
+
+# ============ Document/Dossier Schemas ============
+
+class DocumentCreate(BaseModel):
+    """Schema for creating/submitting a document"""
+    document_type: str  # cni, residence, diploma, cv, photo, birth_certificate, military, work_certificate
+    file_name: Optional[str] = None
+    file_url: Optional[str] = None
+
+
+class DocumentUpdate(BaseModel):
+    """Schema for updating document status (admin)"""
+    status: str  # pending, approved, rejected
+    notes: Optional[str] = None
+
+
+class DocumentResponse(BaseModel):
+    """Schema for document response"""
+    id: int
+    user_id: int
+    document_type: str
+    file_name: Optional[str]
+    file_url: Optional[str]
+    status: str
+    notes: Optional[str]
+    submitted_at: Optional[datetime]
+    reviewed_at: Optional[datetime]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class DossierStatus(BaseModel):
+    """Schema for overall dossier/registration status"""
+    total_required: int
+    total_submitted: int
+    total_approved: int
+    total_pending: int
+    total_rejected: int
+    completion_percentage: float
+    documents: List[DocumentResponse]
+    is_complete: bool
+    can_apply: bool  # True if minimum documents are approved

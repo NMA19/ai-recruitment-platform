@@ -25,6 +25,26 @@ class ApplicationStatus(str, enum.Enum):
     REJECTED = "rejected"
 
 
+class DocumentType(str, enum.Enum):
+    """Document type for ANEM registration"""
+    CNI = "cni"  # Carte Nationale d'Identité
+    RESIDENCE = "residence"  # Certificat de résidence
+    PHOTO = "photo"  # Photos d'identité
+    DIPLOMA = "diploma"  # Diplômes
+    CV = "cv"  # Curriculum Vitae
+    BIRTH_CERTIFICATE = "birth_certificate"  # Extrait de naissance
+    MILITARY = "military"  # Situation militaire (for males)
+    WORK_CERTIFICATE = "work_certificate"  # Attestation de travail
+
+
+class DocumentStatus(str, enum.Enum):
+    """Document submission status"""
+    NOT_SUBMITTED = "not_submitted"
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+
 class ContractType(str, enum.Enum):
     """Contract type enumeration"""
     FULL_TIME = "full-time"
@@ -69,6 +89,7 @@ class User(Base):
     jobs = relationship("Job", back_populates="recruiter", cascade="all, delete-orphan")
     applications = relationship("Application", back_populates="candidate", cascade="all, delete-orphan")
     chat_messages = relationship("ChatMessage", back_populates="user", cascade="all, delete-orphan")
+    documents = relationship("Document", back_populates="user", cascade="all, delete-orphan")
 
 
 class Job(Base):
@@ -125,3 +146,23 @@ class ChatMessage(Base):
 
     # Relationships
     user = relationship("User", back_populates="chat_messages")
+
+
+class Document(Base):
+    """Document model for ANEM registration dossier tracking"""
+    __tablename__ = "documents"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    document_type = Column(String(50), nullable=False)  # CNI, residence, diploma, etc.
+    file_name = Column(String(255), nullable=True)
+    file_url = Column(String(500), nullable=True)
+    status = Column(String(50), default=DocumentStatus.NOT_SUBMITTED.value)
+    notes = Column(Text, nullable=True)  # Admin notes or rejection reason
+    submitted_at = Column(DateTime, nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="documents")

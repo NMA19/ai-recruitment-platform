@@ -13,6 +13,7 @@ import JobsPage from './pages/JobsPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ApplicationsPage from './pages/ApplicationsPage';
+import DossierPage from './pages/DossierPage';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/applications" element={<ApplicationsPage />} />
+                <Route path="/dossier" element={<DossierPage />} />
               </Routes>
             </div>
           </Router>
