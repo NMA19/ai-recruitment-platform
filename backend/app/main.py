@@ -8,14 +8,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .db.database import engine, Base
 from .api.routes import auth_router, jobs_router, applications_router, chat_router
+from .api.routes.profile import router as profile_router
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 # Create FastAPI app
 app = FastAPI(
-    title="AI Recruitment Platform",
-    description="A modern recruitment platform with AI chatbot interface",
+    title="Wassit Online - ANEM Platform",
+    description="Plateforme de recrutement avec chatbot IA pour ANEM Algérie",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -35,13 +36,14 @@ app.include_router(auth_router)
 app.include_router(jobs_router)
 app.include_router(applications_router)
 app.include_router(chat_router)
+app.include_router(profile_router)
 
 
 @app.get("/")
 def root():
     """Root endpoint"""
     return {
-        "message": "Welcome to the AI Recruitment Platform API",
+        "message": "Bienvenue sur Wassit Online - Plateforme ANEM",
         "docs": "/docs",
         "version": "1.0.0"
     }

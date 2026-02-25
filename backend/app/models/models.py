@@ -46,6 +46,24 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Profile/CV fields
+    phone = Column(String(20), nullable=True)
+    wilaya = Column(String(100), nullable=True)  # Algerian province
+    address = Column(String(500), nullable=True)
+    date_of_birth = Column(DateTime, nullable=True)
+    bio = Column(Text, nullable=True)  # Short summary
+    
+    # Education & Experience (JSON stored as text)
+    education = Column(Text, nullable=True)  # JSON array of education entries
+    experience = Column(Text, nullable=True)  # JSON array of experience entries
+    skills = Column(Text, nullable=True)  # Comma-separated skills
+    languages = Column(Text, nullable=True)  # JSON array of languages with levels
+    
+    # ANEM specific
+    anem_registered = Column(Boolean, default=False)
+    anem_registration_date = Column(DateTime, nullable=True)
+    anem_renewal_date = Column(DateTime, nullable=True)
 
     # Relationships
     jobs = relationship("Job", back_populates="recruiter", cascade="all, delete-orphan")

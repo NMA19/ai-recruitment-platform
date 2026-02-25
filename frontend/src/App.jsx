@@ -1,11 +1,12 @@
 /**
- * AI Recruitment Platform
+ * Wassit Online - ANEM Platform
  * Main Application Component
  */
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
 import ChatPage from './pages/ChatPage';
 import JobsPage from './pages/JobsPage';
@@ -16,20 +17,22 @@ import ApplicationsPage from './pages/ApplicationsPage';
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-            <Navbar />
-          <Routes>
-            <Route path="/" element={<ChatPage />} />
-            <Route path="/jobs" element={<JobsPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-              <Route path="/applications" element={<ApplicationsPage />} />
-            </Routes>
-          </div>
-        </Router>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <Router>
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<ChatPage />} />
+                <Route path="/jobs" element={<JobsPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/applications" element={<ApplicationsPage />} />
+              </Routes>
+            </div>
+          </Router>
+        </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

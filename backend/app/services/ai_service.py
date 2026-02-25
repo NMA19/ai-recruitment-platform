@@ -1,6 +1,7 @@
 """
 AI Service for natural language processing
 Handles job search queries, application commands, and general assistance
+Optimized for ANEM/Wassit Online Algeria
 """
 
 import re
@@ -10,6 +11,287 @@ from sqlalchemy.orm import Session
 
 from ..core.config import settings
 from ..models.models import Job, Application, User, ApplicationStatus
+
+
+# All 58 Algerian Wilayas for location matching
+ALGERIAN_WILAYAS = [
+    'adrar', 'chlef', 'laghouat', 'oum el bouaghi', 'batna', 'béjaïa', 'bejaia', 
+    'biskra', 'béchar', 'bechar', 'blida', 'bouira', 'tamanrasset', 'tébessa', 
+    'tebessa', 'tlemcen', 'tiaret', 'tizi ouzou', 'alger', 'algiers', 'djelfa', 
+    'jijel', 'sétif', 'setif', 'saïda', 'saida', 'skikda', 'sidi bel abbès', 
+    'sidi bel abbes', 'annaba', 'guelma', 'constantine', 'médéa', 'medea', 
+    'mostaganem', "m'sila", 'msila', 'mascara', 'ouargla', 'oran', 'el bayadh', 
+    'illizi', 'bordj bou arréridj', 'bordj bou arreridj', 'boumerdès', 'boumerdes', 
+    'el tarf', 'tindouf', 'tissemsilt', 'el oued', 'khenchela', 'souk ahras', 
+    'tipaza', 'mila', 'aïn defla', 'ain defla', 'naâma', 'naama', 
+    'aïn témouchent', 'ain temouchent', 'ghardaïa', 'ghardaia', 'relizane',
+    "el m'ghair", 'el meniaa', 'ouled djellal', 'bordj badji mokhtar', 
+    'béni abbès', 'beni abbes', 'timimoun', 'touggourt', 'djanet', 'in salah', 'in guezzam'
+]
+
+# ANEM FAQ Database
+ANEM_FAQ = {
+    # Registration questions
+    "register|inscription|s'inscrire|تسجيل|enregistrer": {
+        "en": """To register with ANEM (Wassit Online):
+1. Visit https://wassitonline.anem.dz
+2. Click "Espace demandeur" (Job Seeker Space)
+3. Create an account with your email
+4. Complete your profile with personal info
+5. Upload required documents
+
+**Required documents:**
+- National ID card (CNI)
+- Residence certificate (Certificat de résidence)
+- Passport photos
+- Diplomas/certificates""",
+        "fr": """Pour s'inscrire à l'ANEM (Wassit Online):
+1. Visitez https://wassitonline.anem.dz
+2. Cliquez sur "Espace demandeur"
+3. Créez un compte avec votre email
+4. Complétez votre profil
+5. Téléchargez les documents requis
+
+**Documents requis:**
+- Carte nationale d'identité (CNI)
+- Certificat de résidence
+- Photos d'identité
+- Diplômes/certificats""",
+        "ar": """للتسجيل في ANEM (وسيط أونلاين):
+1. قم بزيارة https://wassitonline.anem.dz
+2. انقر على "فضاء طالب العمل"
+3. أنشئ حساباً بالبريد الإلكتروني
+4. أكمل ملفك الشخصي
+5. حمّل الوثائق المطلوبة
+
+**الوثائق المطلوبة:**
+- بطاقة التعريف الوطنية
+- شهادة الإقامة
+- صور شمسية
+- الشهادات والدبلومات"""
+    },
+    
+    # Renewal questions
+    "renew|renouveler|renouvellement|تجديد|renewal": {
+        "en": """To renew your ANEM registration:
+1. Log in to Wassit Online
+2. Go to "Renouveler ma demande"
+3. Update your information if needed
+4. Confirm the renewal
+
+**Important:** Renewal must be done every 6 months. You'll receive an SMS reminder.""",
+        "fr": """Pour renouveler votre inscription ANEM:
+1. Connectez-vous à Wassit Online
+2. Allez sur "Renouveler ma demande"
+3. Mettez à jour vos informations si nécessaire
+4. Confirmez le renouvellement
+
+**Important:** Le renouvellement doit être fait tous les 6 mois. Vous recevrez un rappel par SMS.""",
+        "ar": """لتجديد تسجيلك في ANEM:
+1. سجّل الدخول إلى وسيط أونلاين
+2. اذهب إلى "تجديد طلبي"
+3. حدّث معلوماتك إذا لزم الأمر
+4. أكّد التجديد
+
+**مهم:** يجب التجديد كل 6 أشهر. ستتلقى رسالة تذكير."""
+    },
+    
+    # Documents questions
+    "documents|papers|papiers|وثائق|dossier": {
+        "en": """Documents needed for ANEM registration:
+
+**Mandatory:**
+- National ID card (CNI)
+- Residence certificate (less than 3 months old)
+- 4 passport photos
+- Birth certificate
+
+**For graduates:**
+- Diploma copy
+- Academic transcripts
+
+**For experienced workers:**
+- Work certificates
+- Reference letters""",
+        "fr": """Documents nécessaires pour l'inscription ANEM:
+
+**Obligatoires:**
+- Carte nationale d'identité (CNI)
+- Certificat de résidence (moins de 3 mois)
+- 4 photos d'identité
+- Acte de naissance
+
+**Pour les diplômés:**
+- Copie du diplôme
+- Relevés de notes
+
+**Pour les expérimentés:**
+- Certificats de travail
+- Lettres de recommandation""",
+        "ar": """الوثائق المطلوبة للتسجيل في ANEM:
+
+**إلزامية:**
+- بطاقة التعريف الوطنية
+- شهادة الإقامة (أقل من 3 أشهر)
+- 4 صور شمسية
+- شهادة الميلاد
+
+**للمتخرجين:**
+- نسخة من الشهادة
+- كشوف النقاط
+
+**لذوي الخبرة:**
+- شهادات العمل
+- رسائل التوصية"""
+    },
+    
+    # Training questions
+    "training|formation|تكوين|stage": {
+        "en": """ANEM offers several training programs:
+
+**1. DAIP (Dispositif d'Aide à l'Insertion Professionnelle)**
+- For first-time job seekers
+- Internship with monthly allowance
+- Duration: 6-12 months
+
+**2. CFI (Contrat Formation-Insertion)**
+- Professional training contract
+- Leads to permanent employment
+
+**3. CTA (Contrat de Travail Aidé)**
+- Subsidized employment contract
+- For experienced workers
+
+Visit your local ANEM agency for more details.""",
+        "fr": """L'ANEM propose plusieurs programmes de formation:
+
+**1. DAIP (Dispositif d'Aide à l'Insertion Professionnelle)**
+- Pour les primo-demandeurs d'emploi
+- Stage avec indemnité mensuelle
+- Durée: 6-12 mois
+
+**2. CFI (Contrat Formation-Insertion)**
+- Contrat de formation professionnelle
+- Mène à un emploi permanent
+
+**3. CTA (Contrat de Travail Aidé)**
+- Contrat de travail subventionné
+- Pour les travailleurs expérimentés
+
+Visitez votre agence ANEM locale pour plus de détails.""",
+        "ar": """يقدم ANEM عدة برامج تكوينية:
+
+**1. DAIP (جهاز المساعدة على الإدماج المهني)**
+- للباحثين عن العمل لأول مرة
+- تربص مع منحة شهرية
+- المدة: 6-12 شهر
+
+**2. CFI (عقد التكوين والإدماج)**
+- عقد تكوين مهني
+- يؤدي إلى توظيف دائم
+
+**3. CTA (عقد العمل المدعوم)**
+- عقد عمل مدعوم
+- للعمال ذوي الخبرة
+
+قم بزيارة وكالة ANEM المحلية لمزيد من التفاصيل."""
+    },
+    
+    # Contact questions
+    "contact|agency|agence|وكالة|address|adresse|عنوان": {
+        "en": """ANEM Contact Information:
+
+**Headquarters:**
+5 Rue Capitaine Nourreddine Mennani, Algiers
+
+**Website:** https://wassitonline.anem.dz
+**Email:** support.technique@anem.dz
+
+**Find your local agency:**
+Visit the ANEM website and search by Wilaya
+
+**Hotline:** Call your local agency for appointments""",
+        "fr": """Coordonnées ANEM:
+
+**Siège:**
+5 Rue Capitaine Nourreddine Mennani, Alger
+
+**Site web:** https://wassitonline.anem.dz
+**Email:** support.technique@anem.dz
+
+**Trouver votre agence locale:**
+Visitez le site ANEM et recherchez par Wilaya
+
+**Assistance:** Appelez votre agence locale pour prendre rendez-vous""",
+        "ar": """معلومات الاتصال بـ ANEM:
+
+**المقر الرئيسي:**
+5 شارع النقيب نورالدين مناني، الجزائر
+
+**الموقع:** https://wassitonline.anem.dz
+**البريد:** support.technique@anem.dz
+
+**ابحث عن وكالتك المحلية:**
+قم بزيارة موقع ANEM وابحث حسب الولاية
+
+**المساعدة:** اتصل بوكالتك المحلية لحجز موعد"""
+    },
+    
+    # ANIS/ANSEJ questions
+    "ansej|anis|cnac|startup|مقاولاتية|entreprise": {
+        "en": """For entrepreneurship support in Algeria:
+
+**ANIS (ex-ANSEJ)** - For young entrepreneurs (19-40 years)
+- Startup funding
+- Interest-free loans
+- Training and support
+
+**CNAC** - For unemployed over 30 years
+- Business creation support
+- Equipment financing
+
+**Requirements:**
+- Algerian nationality
+- Professional qualification
+- Business plan
+
+Visit www.anis.dz for more information.""",
+        "fr": """Pour le soutien à l'entrepreneuriat en Algérie:
+
+**ANIS (ex-ANSEJ)** - Pour jeunes entrepreneurs (19-40 ans)
+- Financement de startup
+- Prêts sans intérêts
+- Formation et accompagnement
+
+**CNAC** - Pour chômeurs de plus de 30 ans
+- Aide à la création d'entreprise
+- Financement d'équipements
+
+**Conditions:**
+- Nationalité algérienne
+- Qualification professionnelle
+- Business plan
+
+Visitez www.anis.dz pour plus d'informations.""",
+        "ar": """لدعم ريادة الأعمال في الجزائر:
+
+**ANIS (سابقاً ANSEJ)** - لرواد الأعمال الشباب (19-40 سنة)
+- تمويل المشاريع الناشئة
+- قروض بدون فوائد
+- تكوين ومرافقة
+
+**CNAC** - للعاطلين فوق 30 سنة
+- دعم إنشاء المؤسسات
+- تمويل المعدات
+
+**الشروط:**
+- الجنسية الجزائرية
+- مؤهل مهني
+- دراسة جدوى
+
+قم بزيارة www.anis.dz لمزيد من المعلومات."""
+    }
+}
 
 
 class AIService:
@@ -51,6 +333,8 @@ class AIService:
             return self._handle_apply(params, db, user)
         elif intent == "my_applications":
             return self._handle_my_applications(db, user)
+        elif intent == "anem_faq":
+            return self._handle_anem_faq(params)
         elif intent == "help":
             return self._handle_help()
         elif intent == "greeting":
@@ -64,26 +348,34 @@ class AIService:
         params = {}
 
         # Greeting patterns
-        greeting_patterns = ["hello", "hi", "hey", "bonjour", "salut", "good morning", "good afternoon"]
+        greeting_patterns = ["hello", "hi", "hey", "bonjour", "salut", "good morning", "good afternoon", "مرحبا", "السلام", "صباح"]
         if any(message.startswith(g) for g in greeting_patterns):
             return "greeting", params
 
         # Help patterns
-        if any(word in message for word in ["help", "what can you do", "commands", "aide"]):
+        if any(word in message for word in ["help", "what can you do", "commands", "aide", "مساعدة"]):
             return "help", params
 
+        # ANEM FAQ detection
+        for pattern, responses in ANEM_FAQ.items():
+            if re.search(pattern, message, re.IGNORECASE):
+                params["faq_key"] = pattern
+                params["responses"] = responses
+                return "anem_faq", params
+
         # Apply patterns
-        apply_match = re.search(r"apply\s+(?:for\s+)?(?:job\s+)?#?(\d+)", message)
+        apply_match = re.search(r"(?:apply|postuler|تقدم)\s+(?:for\s+)?(?:job\s+)?#?(\d+)", message)
         if apply_match:
             params["job_id"] = int(apply_match.group(1))
             return "apply_job", params
 
         # My applications
-        if any(phrase in message for phrase in ["my applications", "mes candidatures", "show my applications", "list my applications"]):
+        if any(phrase in message for phrase in ["my applications", "mes candidatures", "show my applications", "list my applications", "طلباتي"]):
             return "my_applications", params
 
         # Job search patterns
-        search_keywords = ["find", "search", "show", "list", "looking for", "cherche", "jobs", "job", "positions", "internship", "internships", "stage"]
+        search_keywords = ["find", "search", "show", "list", "looking for", "cherche", "trouver", "jobs", "job", 
+                          "positions", "internship", "internships", "stage", "emploi", "travail", "وظائف", "عمل", "ابحث"]
         if any(keyword in message for keyword in search_keywords):
             # Extract search parameters
             params = self._extract_search_params(message)
@@ -95,36 +387,48 @@ class AIService:
         """Extract search parameters from message"""
         params = {}
 
-        # Extract location
-        location_patterns = [
-            r"in\s+([A-Za-z\s]+?)(?:\s+with|\s+for|\s*$|,|\.|!)",
-            r"at\s+([A-Za-z\s]+?)(?:\s+with|\s+for|\s*$|,|\.|!)",
-            r"à\s+([A-Za-z\s]+?)(?:\s+avec|\s+pour|\s*$|,|\.|!)"
-        ]
-        for pattern in location_patterns:
-            match = re.search(pattern, message, re.IGNORECASE)
-            if match:
-                params["location"] = match.group(1).strip()
+        # Check for Algerian Wilayas first
+        message_lower = message.lower()
+        for wilaya in ALGERIAN_WILAYAS:
+            if wilaya in message_lower:
+                # Normalize wilaya name
+                params["location"] = wilaya.title()
                 break
+
+        # If no wilaya found, try general location patterns
+        if "location" not in params:
+            location_patterns = [
+                r"in\s+([A-Za-z\s]+?)(?:\s+with|\s+for|\s*$|,|\.|!)",
+                r"at\s+([A-Za-z\s]+?)(?:\s+with|\s+for|\s*$|,|\.|!)",
+                r"à\s+([A-Za-z\s]+?)(?:\s+avec|\s+pour|\s*$|,|\.|!)",
+                r"في\s+([A-Za-z\s\u0600-\u06FF]+?)(?:\s|$|,|\.|!)"
+            ]
+            for pattern in location_patterns:
+                match = re.search(pattern, message, re.IGNORECASE)
+                if match:
+                    params["location"] = match.group(1).strip()
+                    break
 
         # Extract skills
         skill_keywords = ["python", "java", "javascript", "react", "node", "sql", "django", "fastapi", 
                          "machine learning", "ai", "data science", "devops", "aws", "docker", "kubernetes",
-                         "php", "laravel", "vue", "angular", "typescript", "go", "rust", "c++", "c#", ".net"]
+                         "php", "laravel", "vue", "angular", "typescript", "go", "rust", "c++", "c#", ".net",
+                         "excel", "word", "comptabilité", "gestion", "marketing", "commercial", "vente",
+                         "électricité", "mécanique", "plomberie", "soudure", "btp", "architecture"]
         found_skills = [skill for skill in skill_keywords if skill in message.lower()]
         if found_skills:
             params["skills"] = found_skills
 
-        # Extract contract type
-        if any(word in message for word in ["internship", "stage", "intern"]):
+        # Extract contract type (including French/Arabic terms)
+        if any(word in message for word in ["internship", "stage", "intern", "تربص"]):
             params["contract_type"] = "internship"
-        elif any(word in message for word in ["full-time", "full time", "temps plein", "cdi"]):
+        elif any(word in message for word in ["full-time", "full time", "temps plein", "cdi", "دائم"]):
             params["contract_type"] = "full-time"
-        elif any(word in message for word in ["part-time", "part time", "temps partiel"]):
+        elif any(word in message for word in ["part-time", "part time", "temps partiel", "جزئي"]):
             params["contract_type"] = "part-time"
-        elif any(word in message for word in ["freelance", "remote"]):
+        elif any(word in message for word in ["freelance", "remote", "عن بعد"]):
             params["contract_type"] = "freelance"
-        elif any(word in message for word in ["contract", "cdd"]):
+        elif any(word in message for word in ["contract", "cdd", "عقد"]):
             params["contract_type"] = "contract"
 
         return params
@@ -282,30 +586,49 @@ class AIService:
 
 🔍 **Job Search:**
 - "Find Python jobs in Algiers"
-- "Show me internships"
+- "Show me internships in Oran"
 - "Search for React developer positions"
 
 📝 **Applications:**
 - "Apply for job #5"
 - "Show my applications"
 
+🏛️ **ANEM Information:**
+- "How to register with ANEM?"
+- "What documents do I need?"
+- "How to renew my registration?"
+- "ANEM training programs"
+- "ANSEJ/ANIS for entrepreneurs"
+
 💡 **Tips:**
-- You can search by skills, location, or contract type
+- You can search by skills, location (Wilaya), or contract type
 - Login to apply for jobs and track your applications
+- Ask me anything about ANEM services!
 
 How can I assist you today?""",
             "action": "help"
+        }
+
+    def _handle_anem_faq(self, params: Dict) -> Dict[str, Any]:
+        """Handle ANEM FAQ questions"""
+        responses = params.get("responses", {})
+        # Default to French for Algeria
+        response = responses.get("fr", responses.get("en", ""))
+        
+        return {
+            "response": response,
+            "action": "anem_faq"
         }
 
     def _handle_greeting(self, user: Optional[User]) -> Dict[str, Any]:
         """Handle greeting"""
         if user:
             return {
-                "response": f"Hello {user.full_name}! 👋 Welcome back to the recruitment platform. How can I help you today? You can search for jobs, apply to positions, or check your applications.",
+                "response": f"Bonjour {user.full_name}! 👋 Bienvenue sur Wassit Online. Comment puis-je vous aider aujourd'hui? Vous pouvez chercher des emplois, postuler, ou me poser des questions sur l'ANEM.",
                 "action": "greeting"
             }
         return {
-            "response": "Hello! 👋 Welcome to the AI Recruitment Platform. I can help you find jobs, answer questions about positions, and more. What are you looking for today?",
+            "response": "Bonjour! 👋 Bienvenue sur Wassit Online - Votre assistant ANEM. Je peux vous aider à trouver des emplois, postuler, et répondre à vos questions sur l'ANEM. Que cherchez-vous aujourd'hui?",
             "action": "greeting"
         }
 

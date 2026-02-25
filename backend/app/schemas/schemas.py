@@ -3,7 +3,7 @@ Pydantic Schemas for request/response validation
 """
 
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Any
 from datetime import datetime
 
 
@@ -31,6 +31,88 @@ class UserResponse(BaseModel):
     role: str
     is_active: bool
     created_at: datetime
+    # Profile fields
+    phone: Optional[str] = None
+    wilaya: Optional[str] = None
+    address: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    bio: Optional[str] = None
+    education: Optional[str] = None
+    experience: Optional[str] = None
+    skills: Optional[str] = None
+    languages: Optional[str] = None
+    anem_registered: bool = False
+    anem_registration_date: Optional[datetime] = None
+    anem_renewal_date: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+# ============ Profile Schemas ============
+
+class EducationEntry(BaseModel):
+    """Schema for education entry"""
+    institution: str
+    degree: str
+    field: Optional[str] = None
+    start_year: Optional[int] = None
+    end_year: Optional[int] = None
+    description: Optional[str] = None
+
+
+class ExperienceEntry(BaseModel):
+    """Schema for experience entry"""
+    company: str
+    position: str
+    location: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
+    current: bool = False
+    description: Optional[str] = None
+
+
+class LanguageEntry(BaseModel):
+    """Schema for language entry"""
+    language: str
+    level: str  # beginner, intermediate, advanced, native
+
+
+class ProfileUpdate(BaseModel):
+    """Schema for updating user profile"""
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    wilaya: Optional[str] = None
+    address: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    bio: Optional[str] = None
+    education: Optional[List[EducationEntry]] = None
+    experience: Optional[List[ExperienceEntry]] = None
+    skills: Optional[str] = None
+    languages: Optional[List[LanguageEntry]] = None
+    anem_registered: Optional[bool] = None
+    anem_registration_date: Optional[datetime] = None
+    anem_renewal_date: Optional[datetime] = None
+
+
+class ProfileResponse(BaseModel):
+    """Schema for profile response with parsed JSON fields"""
+    id: int
+    email: str
+    full_name: str
+    role: str
+    phone: Optional[str] = None
+    wilaya: Optional[str] = None
+    address: Optional[str] = None
+    date_of_birth: Optional[datetime] = None
+    bio: Optional[str] = None
+    education: Optional[List[EducationEntry]] = None
+    experience: Optional[List[ExperienceEntry]] = None
+    skills: Optional[str] = None
+    languages: Optional[List[LanguageEntry]] = None
+    anem_registered: bool = False
+    anem_registration_date: Optional[datetime] = None
+    anem_renewal_date: Optional[datetime] = None
 
     class Config:
         from_attributes = True

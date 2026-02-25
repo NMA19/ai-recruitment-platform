@@ -60,13 +60,14 @@ def seed_database():
         recruiter = db.query(User).filter(User.email == "recruiter@example.com").first()
         admin = db.query(User).filter(User.email == "admin@example.com").first()
         
-        # Create jobs
+        # Create jobs - Algerian job market
         jobs = [
+            # IT & Tech Jobs
             Job(
-                title="Senior Python Developer",
-                description="We are looking for an experienced Python developer to join our team. You will work on building scalable web applications using FastAPI and Django. Requirements: 5+ years of Python experience, knowledge of SQL databases, and familiarity with Docker.",
-                company="TechCorp Algeria",
-                location="Algiers",
+                title="Développeur Python Senior",
+                description="Nous recherchons un développeur Python expérimenté pour rejoindre notre équipe. Vous travaillerez sur des applications web utilisant FastAPI et Django. Exigences: 5+ ans d'expérience Python, connaissance des bases de données SQL.",
+                company="TechCorp Algérie",
+                location="Alger",
                 salary_min=80000,
                 salary_max=120000,
                 contract_type=ContractType.FULL_TIME.value,
@@ -74,9 +75,9 @@ def seed_database():
                 recruiter_id=recruiter.id
             ),
             Job(
-                title="Frontend React Developer",
-                description="Join our frontend team to build modern user interfaces using React.js. You will collaborate with designers and backend developers to create seamless user experiences.",
-                company="WebSolutions",
+                title="Développeur Frontend React",
+                description="Rejoignez notre équipe frontend pour créer des interfaces utilisateur modernes avec React.js. Vous collaborerez avec les designers et les développeurs backend.",
+                company="WebSolutions DZ",
                 location="Oran",
                 salary_min=60000,
                 salary_max=90000,
@@ -85,10 +86,10 @@ def seed_database():
                 recruiter_id=recruiter.id
             ),
             Job(
-                title="Data Science Intern",
-                description="Exciting internship opportunity for students passionate about data science and machine learning. You will work on real-world projects and learn from experienced data scientists.",
-                company="AI Innovations",
-                location="Algiers",
+                title="Stagiaire Data Science (DAIP)",
+                description="Opportunité de stage pour étudiants passionnés par la science des données et le machine learning. Programme DAIP éligible. Formation par des data scientists expérimentés.",
+                company="AI Innovations Algérie",
+                location="Alger",
                 salary_min=20000,
                 salary_max=30000,
                 contract_type=ContractType.INTERNSHIP.value,
@@ -96,9 +97,9 @@ def seed_database():
                 recruiter_id=admin.id
             ),
             Job(
-                title="DevOps Engineer",
-                description="Looking for a DevOps engineer to manage our cloud infrastructure and CI/CD pipelines. Experience with AWS, Kubernetes, and Terraform required.",
-                company="CloudFirst",
+                title="Ingénieur DevOps",
+                description="Recherche ingénieur DevOps pour gérer notre infrastructure cloud et pipelines CI/CD. Expérience AWS, Kubernetes et Terraform requise.",
+                company="CloudFirst Maghreb",
                 location="Constantine",
                 salary_min=90000,
                 salary_max=130000,
@@ -106,49 +107,166 @@ def seed_database():
                 skills="AWS, Kubernetes, Docker, Terraform, Jenkins, Linux",
                 recruiter_id=recruiter.id
             ),
+            
+            # Banking & Finance
             Job(
-                title="Full Stack JavaScript Developer",
-                description="We need a full-stack developer proficient in both Node.js and React. You will build end-to-end features for our e-commerce platform.",
-                company="ShopOnline",
-                location="Algiers",
-                salary_min=70000,
-                salary_max=100000,
-                contract_type=ContractType.FULL_TIME.value,
-                skills="JavaScript, Node.js, React, MongoDB, Express",
-                recruiter_id=recruiter.id
-            ),
-            Job(
-                title="Mobile App Developer (React Native)",
-                description="Part-time position for a React Native developer to help us build our mobile application. Flexible hours, remote-friendly.",
-                company="MobileFirst",
-                location="Remote",
-                salary_min=40000,
+                title="Agent Commercial Bancaire",
+                description="Accueil et conseil clientèle, proposition de produits bancaires, gestion des opérations courantes. Formation assurée.",
+                company="BEA - Banque Extérieure d'Algérie",
+                location="Blida",
+                salary_min=45000,
                 salary_max=60000,
-                contract_type=ContractType.PART_TIME.value,
-                skills="React Native, JavaScript, TypeScript, Mobile Development",
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Relation client, Vente, Comptabilité, Microsoft Office",
                 recruiter_id=admin.id
             ),
             Job(
-                title="Backend Java Developer",
-                description="Join our enterprise team building robust Java applications. Experience with Spring Boot and microservices architecture required.",
-                company="EnterpriseSoft",
-                location="Blida",
-                salary_min=75000,
+                title="Comptable",
+                description="Tenue de la comptabilité générale, déclarations fiscales, préparation des bilans. Maîtrise du plan comptable national requis.",
+                company="Groupe Cevital",
+                location="Béjaïa",
+                salary_min=50000,
+                salary_max=75000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Comptabilité, Fiscalité algérienne, Sage, Excel",
+                recruiter_id=recruiter.id
+            ),
+            
+            # Healthcare
+            Job(
+                title="Infirmier(e) Diplômé(e)",
+                description="Soins aux patients, surveillance des paramètres vitaux, administration des traitements. Diplôme d'État requis.",
+                company="Clinique El Azhar",
+                location="Sétif",
+                salary_min=40000,
+                salary_max=55000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Soins infirmiers, Urgences, Communication patient",
+                recruiter_id=admin.id
+            ),
+            Job(
+                title="Pharmacien(ne)",
+                description="Gestion d'officine, délivrance de médicaments, conseil aux patients. Diplôme de pharmacie et inscription à l'Ordre requis.",
+                company="Pharmacie Centrale",
+                location="Tizi Ouzou",
+                salary_min=60000,
+                salary_max=85000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Pharmacologie, Gestion stock, Conseil patient",
+                recruiter_id=recruiter.id
+            ),
+            
+            # Oil & Gas
+            Job(
+                title="Technicien Maintenance Industrielle",
+                description="Maintenance préventive et curative des équipements industriels. Rotation 28/28. Logé et nourri sur site.",
+                company="Sonatrach",
+                location="Hassi Messaoud",
+                salary_min=100000,
+                salary_max=150000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Maintenance industrielle, Électromécanique, HSE",
+                recruiter_id=recruiter.id
+            ),
+            Job(
+                title="Ingénieur HSE",
+                description="Mise en place et suivi des procédures HSE, audits sécurité, formation du personnel. Expérience secteur pétrolier requise.",
+                company="Schlumberger Algérie",
+                location="Ouargla",
+                salary_min=120000,
+                salary_max=180000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="HSE, Audit sécurité, ISO 14001, Formation",
+                recruiter_id=admin.id
+            ),
+            
+            # Education
+            Job(
+                title="Enseignant(e) d'Anglais",
+                description="Enseignement de l'anglais tous niveaux. Préparation aux examens internationaux (TOEFL, IELTS). Temps partiel possible.",
+                company="British Council Algérie",
+                location="Alger",
+                salary_min=35000,
+                salary_max=50000,
+                contract_type=ContractType.PART_TIME.value,
+                skills="Anglais natif, Pédagogie, TEFL/TESOL",
+                recruiter_id=recruiter.id
+            ),
+            
+            # Construction
+            Job(
+                title="Conducteur de Travaux BTP",
+                description="Supervision des chantiers, coordination des équipes, suivi budgétaire et planning. Projets résidentiels et commerciaux.",
+                company="COSIDER Construction",
+                location="Tipaza",
+                salary_min=80000,
                 salary_max=110000,
                 contract_type=ContractType.FULL_TIME.value,
-                skills="Java, Spring Boot, Microservices, PostgreSQL, Kafka",
-                recruiter_id=recruiter.id
+                skills="Gestion chantier, AutoCAD, MS Project, BTP",
+                recruiter_id=admin.id
             ),
             Job(
-                title="UI/UX Designer & Frontend Developer",
-                description="Hybrid role for someone who can both design and implement beautiful user interfaces. Figma expertise and React skills required.",
-                company="DesignTech",
-                location="Oran",
-                salary_min=55000,
-                salary_max=85000,
+                title="Architecte",
+                description="Conception de projets architecturaux, suivi de chantier, relation client. Portfolio requis.",
+                company="Cabinet d'Architecture Moderne",
+                location="Annaba",
+                salary_min=70000,
+                salary_max=100000,
                 contract_type=ContractType.CONTRACT.value,
-                skills="Figma, React, CSS, JavaScript, UI/UX Design",
+                skills="AutoCAD, Revit, 3D Max, Conception architecturale",
+                recruiter_id=recruiter.id
+            ),
+            
+            # Telecom
+            Job(
+                title="Technicien Réseau Télécom",
+                description="Installation et maintenance réseaux fibre optique et mobile. Astreintes possibles. Véhicule de service fourni.",
+                company="Algérie Télécom",
+                location="Médéa",
+                salary_min=45000,
+                salary_max=65000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Fibre optique, 4G/5G, Cisco, Huawei",
                 recruiter_id=admin.id
+            ),
+            
+            # Agriculture
+            Job(
+                title="Ingénieur Agronome",
+                description="Développement de cultures céréalières, conseil technique aux agriculteurs. Déplacements fréquents dans la wilaya.",
+                company="ITGC - Institut Technique des Grandes Cultures",
+                location="Tiaret",
+                salary_min=55000,
+                salary_max=75000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Agronomie, Irrigation, Phytosanitaire",
+                recruiter_id=recruiter.id
+            ),
+            
+            # Retail & Commerce
+            Job(
+                title="Responsable Magasin",
+                description="Gestion d'un point de vente, management d'équipe, atteinte des objectifs commerciaux. Expérience grande distribution souhaitée.",
+                company="Carrefour Algérie",
+                location="Oran",
+                salary_min=50000,
+                salary_max=70000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Management, Commerce, Gestion stocks, Relation client",
+                recruiter_id=admin.id
+            ),
+            
+            # Transport & Logistics
+            Job(
+                title="Chauffeur Poids Lourd",
+                description="Transport de marchandises inter-wilayas. Permis C requis. Connaissance du réseau routier national.",
+                company="SNTR - Société Nationale des Transports Routiers",
+                location="Ghardaïa",
+                salary_min=35000,
+                salary_max=50000,
+                contract_type=ContractType.FULL_TIME.value,
+                skills="Permis C, Mécanique de base, GPS",
+                recruiter_id=recruiter.id
             ),
         ]
         
