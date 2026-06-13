@@ -1,0 +1,24 @@
+[Unit]
+Description=Wassit AI Chatbot Flask Backend
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/wassit-ai-chatbot
+Environment=PORT=5000
+Environment=FLASK_DEBUG=0
+Environment=MAX_CONTENT_LENGTH=8388608
+Environment=CHAT_RATE_LIMIT=20
+Environment=WASSIT_DB_PATH=/var/lib/wassit-ai-chatbot/wassit.db
+Environment=BACKUP_DIR=/var/backups/wassit-ai-chatbot
+EnvironmentFile=-/etc/wassit-ai-chatbot/wassit.env
+ExecStart=/opt/wassit-ai-chatbot/.venv/bin/python backend/app.py
+Restart=always
+RestartSec=5
+User=www-data
+Group=www-data
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+# Run the DB backup every day at 02:00 server time.
+# Adjust /opt/wassit-ai-chatbot if you deploy to a different path.
+
+0 2 * * * APP_ROOT=/opt/wassit-ai-chatbot BACKUP_DIR=/var/backups/wassit-ai-chatbot /opt/wassit-ai-chatbot/.venv/bin/python /opt/wassit-ai-chatbot/backend/backup_db.py >> /var/log/wassit-ai-chatbot/backup.log 2>&1

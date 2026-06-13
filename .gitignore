@@ -1,0 +1,36 @@
+cat > .gitignore << 'EOF'
+# Python
+.venv/
+**/.venv/
+__pycache__/
+**/__pycache__/
+*.pyc
+
+# Node
+node_modules/
+**/node_modules/
+dist/
+build/
+
+# Logs
+*.log
+backend.log
+
+# Env files
+.env
+.env.local
+*.env.example.local
+
+# Data/DB
+backend/data/
+*.sqlite3
+*.db
+
+# Misc
+.DS_Store
+EOF
+backend/backups/
+backend/logs/
+frontend/test-results/requai_deploy/models/algerian_jobs_sample.csv
+frontend/test-results/
+requai_deploy/models/algerian_jobs_sample.csv

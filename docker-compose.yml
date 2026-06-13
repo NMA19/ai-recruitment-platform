@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wassit-backend
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=0
+      - PORT=5000
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - PASSWORD_SALT=${PASSWORD_SALT:-wassit-salt}
+      - WASSIT_DB_PATH=/app/data/wassit.db
+      - CHAT_RATE_LIMIT=${CHAT_RATE_LIMIT:-20}
+      - MAX_CONTENT_LENGTH=${MAX_CONTENT_LENGTH:-8388608}
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+      - ./backend/backups:/app/backups
+    networks:
+      - wassit-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: wassit-frontend
+    environment:
+      - VITE_API_URL=http://localhost/api
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - wassit-network
+    restart: unless-stopped
+
+  # Optional: Database migration/backup service
+  db-backup:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: wassit-db-backup
+    command: python /app/backup_db.py
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/backups:/app/backups
+    networks:
+      - wassit-network
+    restart: no
+    profiles:
+      - backup
+
+networks:
+  wassit-network:
+    driver: bridge
+
+volumes:
+  backend_data:
+  backend_logs:
